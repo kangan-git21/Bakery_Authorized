@@ -33,6 +33,9 @@ class UserSerializer(serializers.ModelSerializer):
 """Login User"""
 
 
+"""Login User"""
+
+
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoginUser
