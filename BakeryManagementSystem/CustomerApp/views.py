@@ -6,7 +6,15 @@ from rest_framework.views import APIView
 
 from AdminApp.models import Item
 from AdminApp.serializers import ItemSerializer
-from CustomerApp.models import Cart
+from CustomerApp.models import Order
+from CustomerApp.serializers import OrderSerializer
+
+
+class AvailableItems(APIView):
+    def get(self, request):
+        get_item = Item.objects.all()
+        item_serializer = ItemSerializer(get_item, many=True)
+        return Response(item_serializer.data)
 
 
 class ShoppingCart(APIView):
@@ -33,6 +41,17 @@ class ShoppingCart(APIView):
         return Response({'Order': 'Can not be carried out'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+"""Cart History"""
+
+
+class OrderHistory(APIView):
+    def get(self, request):
+        if request.user.is_superuser:
+            return Response({'User': 'Not Allowed'}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            show_item = Order.objects.all()
+            serializer_history = OrderSerializer(show_item, many=True)
+            return Response(serializer_history.data)
 
 
 

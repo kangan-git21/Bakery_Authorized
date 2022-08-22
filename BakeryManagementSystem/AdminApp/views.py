@@ -55,7 +55,7 @@ class UserLogOut(APIView):
 
 class IngredientList(APIView):
     def get(self, request):
-        if not request.user.is_superuser:
+        if not User.is_superuser:
             return Response({'User': 'Not Allowed'}, status=status.HTTP_403_FORBIDDEN)
         else:
             ingredients = Ingredient.objects.all()
@@ -63,7 +63,7 @@ class IngredientList(APIView):
             return Response(serializer.data)
 
     def post(self, request):
-        if not request.user.is_superuser:
+        if not User.is_superuser:
             return Response({'User': 'Not Allowed'}, status=status.HTTP_403_FORBIDDEN)
         else:
             serializer = IngredientSerializer(data=request.data)
@@ -73,7 +73,7 @@ class IngredientList(APIView):
             return Response({'List': 'Not Valid'}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request):
-        if not request.user.is_superuser:
+        if not User.is_superuser:
             return Response({'User': 'Not Allowed'}, status=status.HTTP_403_FORBIDDEN)
         else:
             previous_ingredients = Ingredient.objects.get(name=request.data['name'])
