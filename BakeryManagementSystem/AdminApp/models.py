@@ -26,7 +26,7 @@ class LoginUser(models.Model):
 
 
 class Item(models.Model):
-    item_name = models.CharField(max_length=50, )   #Removed unique=True
+    item_name = models.CharField(max_length=50)   #Removed unique=True
     quantity = models.IntegerField(default=0)
 
     def __str__(self):

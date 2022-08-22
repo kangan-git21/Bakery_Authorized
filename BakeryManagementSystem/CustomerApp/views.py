@@ -1,16 +1,21 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from AdminApp.models import Item
 from AdminApp.serializers import ItemSerializer
 from CustomerApp.models import Order
+from CustomerApp.permissions import IsOwnerLogged
 from CustomerApp.serializers import OrderSerializer
 
 
+
 class AvailableItems(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         get_item = Item.objects.all()
         item_serializer = ItemSerializer(get_item, many=True)
@@ -18,6 +23,8 @@ class AvailableItems(APIView):
 
 
 class ShoppingCart(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         item = Item.objects.all()
         serializer = ItemSerializer(item, many=True)
@@ -30,6 +37,7 @@ class ShoppingCart(APIView):
             return Response({'Items': 'Ordered'}, status=status.HTTP_201_CREATED)
         return Response({'Not': 'Received'}, status=status.HTTP_400_BAD_REQUEST)
 
+    permission_classes = [IsOwnerLogged]
     def patch(self, request):
         previous_item = Item.objects.get(item_name=request.data['item_name'])
         if previous_item is not None:
@@ -45,18 +53,16 @@ class ShoppingCart(APIView):
 
 
 class OrderHistory(APIView):
-    def get(self, request):
-        if request.user.is_superuser:
-            return Response({'User': 'Not Allowed'}, status=status.HTTP_403_FORBIDDEN)
-        else:
-            show_item = Order.objects.all()
-            serializer_history = OrderSerializer(show_item, many=True)
-            return Response(serializer_history.data)
+   permission_classes = [IsOwnerLogged]
+
+   def get(self, request):
+         show_item = Order.objects.all()
+         return HttpResponse(show_item)
+
+       # serializer_history = OrderSerializer(show_item, many=True)
+       # return Response({serializer_history.data}, status=status.HTTP_200_OK)
 
 
 
 
 
-
-
-# Create your views here.

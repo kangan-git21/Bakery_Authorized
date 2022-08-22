@@ -6,12 +6,13 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .serializers import IngredientSerializer, UserSerializer, LoginSerializer
 from .models import Ingredient, Item, LoginUser, Requirements
 
 
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -38,9 +39,10 @@ class UserLogIn(APIView):
             username = request.data['username']
             password = request.data['password']
             x = authenticate(username=username, password=password)
+            current_user = User.get_username(self)
             if x is not None:
                 login(request, x)
-                return Response({"user": "Logged in"}, status=status.HTTP_200_OK)
+                return Response({current_user: "user Logged In"}, status=status.HTTP_200_OK)
             return Response({"Serializer": "invalid"}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -54,35 +56,29 @@ class UserLogOut(APIView):
 
 
 class IngredientList(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+
     def get(self, request):
-        if not User.is_superuser:
-            return Response({'User': 'Not Allowed'}, status=status.HTTP_403_FORBIDDEN)
-        else:
-            ingredients = Ingredient.objects.all()
-            serializer = IngredientSerializer(ingredients, many=True)
-            return Response(serializer.data)
+        ingredients = Ingredient.objects.all()
+        serializer = IngredientSerializer(ingredients, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
-        if not User.is_superuser:
-            return Response({'User': 'Not Allowed'}, status=status.HTTP_403_FORBIDDEN)
-        else:
-            serializer = IngredientSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({'items': 'Ingredients Created'}, status=status.HTTP_201_CREATED)
-            return Response({'List': 'Not Valid'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = IngredientSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'items': 'Ingredients Created'}, status=status.HTTP_201_CREATED)
+        return Response({'List': 'Not Valid'}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request):
-        if not User.is_superuser:
-            return Response({'User': 'Not Allowed'}, status=status.HTTP_403_FORBIDDEN)
+        previous_ingredients = Ingredient.objects.get(name=request.data['name'])
+        if previous_ingredients is not None:
+            previous_ingredients.quantity += request.data['quantity']
+            previous_ingredients.save()
+            return Response({'items': 'Ingredients updated'}, status=status.HTTP_200_OK)
         else:
-            previous_ingredients = Ingredient.objects.get(name=request.data['name'])
-            if previous_ingredients is not None:
-                previous_ingredients.quantity += request.data['quantity']
-                previous_ingredients.save()
-                return Response({'items': 'Ingredients updated'}, status=status.HTTP_200_OK)
-            else:
-                return Response({'Ingredient': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'Ingredient': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 """cCalculating price of One respective item"""
