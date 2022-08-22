@@ -1,6 +1,10 @@
 from django.db import models
 
 
+""" The Ingredient Model having list of ingredients present in Stock with name, 
+its quantity and cost_price of one ingredient. """
+
+
 class Ingredient(models.Model):
     name = models.CharField(max_length=50, unique=True)
     quantity = models.IntegerField(default=0)
@@ -10,9 +14,15 @@ class Ingredient(models.Model):
         return f"{self.name}"
 
 
+""" Login to the App"""
+
+
 class LoginUser(models.Model):
     username = models.CharField(max_length=150)
     password = models.CharField(max_length=120)
+
+
+"""Item present in Bakery having name and quantity"""
 
 
 class Item(models.Model):
@@ -21,6 +31,9 @@ class Item(models.Model):
 
     def __str__(self):
         return f"{self.item_name}"
+
+
+"""Requirements for a bakery item"""
 
 
 class Requirements(models.Model):

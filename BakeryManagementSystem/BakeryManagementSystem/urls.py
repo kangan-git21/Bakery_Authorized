@@ -15,12 +15,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from AdminApp.views import calculate, ingredient_list
-from CustomerApp.views import ShoppingCart
+from AdminApp.views import UserSignUp, UserLogOut, UserLogIn, IngredientList, CalculatePrice
+from CustomerApp.views import ShoppingCart, AvailableItems, OrderHistory
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('test/', calculate),
-    path('ingredientList/', ingredient_list.as_view()),
-    path('item_list', ShoppingCart.as_view())
+    path('test/', CalculatePrice.as_view()),
+    path('ingredientList/', IngredientList.as_view()),
+    path('login/', UserLogIn.as_view()),
+    path('logout/',UserLogOut.as_view()),
+    path('signup/', UserSignUp.as_view()),
+    path('item_list', ShoppingCart.as_view()),
+    path('history/', OrderHistory.as_view()),
+    path('showItems/', AvailableItems.as_view())
 ]
