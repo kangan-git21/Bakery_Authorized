@@ -54,7 +54,6 @@ class ShoppingCart(APIView):
 
 class OrderHistory(APIView):
    permission_classes = [IsOwnerLogged]
-
    def get(self, request):
          show_item = Order.objects.all()
          return HttpResponse(show_item)
